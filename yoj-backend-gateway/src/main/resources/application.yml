@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: yoj-backend-gateway
+  cloud:
+    nacos:
+      serverAddr: 127.0.0.1:8848
+    gateway:
+      #配置动态路由
+      routes:
+        - id: yoj-backend-user-service   #唯一路由表示，没有实际作用不重复就好，建议配合服务名
+          uri: lb://yoj-backend-user-service/ #匹配后提供服务的路由地址，lb后跟提供服务的微服务名，不要写错
+          order: 1
+          predicates:
+            - Path=/api/user/**     #后面是多路径 这里是 /**
+        - id: yoj-backend-question-service
+          uri: lb://yoj-backend-question-service/
+          order: 1
+          predicates:
+            - Path=/api/question/**
+        - id: yoj-backend-judge-service
+          uri: lb://yoj-backend-judge-service/
+          predicates:
+            - Path=/api/judge/**
+  main:
+    web-application-type: reactive
+server:
+  port: 8101
+knife4j:
+  gateway:
+    # ① 第一个配置，开启gateway聚合组件
+    enabled: true
+    # ② 第二行配置，设置聚合模式采用discover服务发现的模式
+    strategy: discover
+    discover:
+      # ③ 第三行配置，开启discover模式
+      enabled: true
+      # ④ 第四行配置，聚合子服务全部为Swagger2规范的文档
+      version: swagger2
+
